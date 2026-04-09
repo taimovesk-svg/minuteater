@@ -126,10 +126,11 @@
         }
 
         const filtered = data.filter(e =>
-          (e.title || "").toLowerCase().includes("ükskord liibanonis")
+        (e.title || "").toLowerCase().includes("ükskord liibanonis") &&
+        e.available === true
         );
 
-        renderEvents(filtered);
+      renderEvents(filtered);
 
       } catch (e) {
         statusEl.innerHTML = "<span class='error'>Tekkis viga andmete laadimisel.</span>";
