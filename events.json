@@ -10,5 +10,23 @@
     "title": "Kuningas Ubu",
     "url": "https://www.piletimaailm.com/performances/140784-kuningas-ubu?lang=et_EE",
     "available": false
+  },
+  {
+    "theatre": "Eesti Draamateater",
+    "title": "Pangalaen",
+    "url": "https://www.piletimaailm.com/organizers/7-eesti-draamateater",
+    "available": false
+  },
+  {
+    "theatre": "Eesti Draamateater",
+    "title": "Võõrad",
+    "url": "https://www.piletimaailm.com/organizers/7-eesti-draamateater",
+    "available": false
+  },
+  {
+    "theatre": "Eesti Draamateater",
+    "title": "500 aastat sõprust",
+    "url": "https://www.piletimaailm.com/organizers/7-eesti-draamateater",
+    "available": false
   }
 ]
