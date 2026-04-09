@@ -70,6 +70,7 @@ async function getLinnateaterEvents() {
       continue;
     }
 
+    // kuupäev nt: "N 09.04"
     const dateMatch = line.match(/^[ETKNRLP]\s+(\d{2})\.(\d{2})$/);
     if (!dateMatch) continue;
 
