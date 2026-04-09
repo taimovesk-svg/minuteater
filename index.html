@@ -106,7 +106,7 @@
     <h1>🎭 Minuteater</h1>
 
     <div class="subtitle">
-      Jälgitav etendus: <strong>Ükskord Liibanonis</strong>
+      Jälgitavad etendused: <strong>Ükskord Liibanonis</strong> ja <strong>Kuningas Ubu</strong>
     </div>
 
     <div id="status" class="status">Laen andmeid...</div>
@@ -126,8 +126,10 @@
           throw new Error("Invalid JSON");
         }
 
+        const watchedTitles = ["ükskord liibanonis", "kuningas ubu"];
+
         const filtered = data.filter(e =>
-          (e.title || "").toLowerCase().includes("ükskord liibanonis") &&
+          watchedTitles.includes((e.title || "").toLowerCase()) &&
           e.available === true
         );
 
@@ -144,13 +146,13 @@
       const container = document.getElementById("events");
 
       statusEl.textContent =
-        `Leitud ${data.length} saadaval etendust. Leht uueneb automaatselt iga 30 sekundi järel.`;
+        `Leitud ${data.length} saadaval etendust. Leht uueneb automaatselt iga 5 minuti järel.`;
 
       if (data.length === 0) {
         container.innerHTML = `
           <div class="empty">
             Praegu ei ole pileteid saadaval.
-            <div class="small">Kontroll toimub automaatselt iga 30 sekundi järel.</div>
+            <div class="small">Kontroll toimub automaatselt iga 5 minuti järel.</div>
           </div>
         `;
         return;
@@ -176,13 +178,13 @@
 
           <br/>
 
-          <a class="button" href="${escapeHtml(mainUrl)}" target="_blank">
+          <a class="button" href="${escapeHtml(mainUrl)}" target="_blank" rel="noopener noreferrer">
             🎟 Osta kohe
           </a>
 
           <br/>
 
-          <a class="button secondary" href="${fallbackUrl}" target="_blank">
+          <a class="button secondary" href="${fallbackUrl}" target="_blank" rel="noopener noreferrer">
             📋 Ava kõik etendused
           </a>
         </div>
@@ -199,7 +201,7 @@
     }
 
     loadEvents();
-    setInterval(loadEvents, 30000);
+    setInterval(loadEvents, 300000);
   </script>
 </body>
 </html>
