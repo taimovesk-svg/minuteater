@@ -106,7 +106,10 @@
     <h1>🎭 Minuteater</h1>
 
     <div class="subtitle">
-      Jälgitavad etendused: <strong>Ükskord Liibanonis</strong> ja <strong>Kuningas Ubu</strong>
+      Jälgitavad etendused:
+      <strong>
+        Ükskord Liibanonis, Kuningas Ubu, Pangalaen, Võõrad, 500 aastat sõprust
+      </strong>
     </div>
 
     <div id="status" class="status">Laen andmeid...</div>
@@ -126,7 +129,13 @@
           throw new Error("Invalid JSON");
         }
 
-        const watchedTitles = ["ükskord liibanonis", "kuningas ubu"];
+        const watchedTitles = [
+          "ükskord liibanonis",
+          "kuningas ubu",
+          "pangalaen",
+          "võõrad",
+          "500 aastat sõprust"
+        ];
 
         const filtered = data.filter(e =>
           watchedTitles.includes((e.title || "").toLowerCase()) &&
@@ -201,7 +210,7 @@
     }
 
     loadEvents();
-    setInterval(loadEvents, 300000);
+    setInterval(loadEvents, 300000); // 5 min
   </script>
 </body>
 </html>
