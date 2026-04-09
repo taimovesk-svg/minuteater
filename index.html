@@ -36,11 +36,12 @@
     }
 
     .card {
-      background: white;
+      background: #e6f7ec;
       border-radius: 14px;
       padding: 18px;
       margin-bottom: 14px;
       box-shadow: 0 1px 5px rgba(0,0,0,0.08);
+      border: 2px solid #2ecc71;
     }
 
     .title {
@@ -53,7 +54,7 @@
       line-height: 1.7;
       color: #333;
       margin-bottom: 8px;
- 
+    }
 
     .button {
       display: inline-block;
@@ -75,8 +76,8 @@
       margin-top: 10px;
       padding: 7px 12px;
       border-radius: 999px;
-      background: #fff3cd;
-      color: #7a5d00;
+      background: #2ecc71;
+      color: white;
       font-size: 13px;
       font-weight: 700;
     }
@@ -126,11 +127,11 @@
         }
 
         const filtered = data.filter(e =>
-        (e.title || "").toLowerCase().includes("ükskord liibanonis") &&
-        e.available === true
+          (e.title || "").toLowerCase().includes("ükskord liibanonis") &&
+          e.available === true
         );
 
-      renderEvents(filtered);
+        renderEvents(filtered);
 
       } catch (e) {
         statusEl.innerHTML = "<span class='error'>Tekkis viga andmete laadimisel.</span>";
@@ -143,17 +144,17 @@
       const container = document.getElementById("events");
 
       statusEl.textContent =
-        `Leitud ${data.length} sobivat kirjet. Leht uueneb automaatselt iga 30 sekundi järel.`;
+        `Leitud ${data.length} saadaval etendust. Leht uueneb automaatselt iga 30 sekundi järel.`;
 
       if (data.length === 0) {
-  container.innerHTML = `
-    <div class="empty">
-      Praegu ei ole pileteid saadaval.
-      <div class="small">Kontroll toimub automaatselt iga 30 sekundi järel.</div>
-    </div>
-  `;
-  return;
-}
+        container.innerHTML = `
+          <div class="empty">
+            Praegu ei ole pileteid saadaval.
+            <div class="small">Kontroll toimub automaatselt iga 30 sekundi järel.</div>
+          </div>
+        `;
+        return;
+      }
 
       container.innerHTML = data.map(renderCard).join("");
     }
@@ -168,15 +169,15 @@
 
           <div class="meta">
             <div><strong>Teater:</strong> ${escapeHtml(e.theatre || "")}</div>
-            <div><strong>Staatus:</strong> Kontrolli saadavust</div>
+            <div><strong>Staatus:</strong> 🟢 Piletid saadaval!</div>
           </div>
 
-          <div class="badge">🎯 Jälgitav etendus</div>
+          <div class="badge">🔥 SAADAVAL</div>
 
           <br/>
 
           <a class="button" href="${escapeHtml(mainUrl)}" target="_blank">
-            🔍 Vaata etendust
+            🎟 Osta kohe
           </a>
 
           <br/>
