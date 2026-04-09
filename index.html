@@ -11,23 +11,29 @@
       margin: 0;
       background: #f5f5f5;
     }
+
     .wrap {
       max-width: 960px;
       margin: 0 auto;
     }
+
     h1 {
       margin-bottom: 8px;
     }
+
     .subtitle {
       color: #555;
       margin-bottom: 24px;
     }
+
     .status {
       background: white;
       border-radius: 12px;
       padding: 12px 16px;
       margin-bottom: 20px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.08);
     }
+
     .card {
       background: white;
       border-radius: 14px;
@@ -35,15 +41,18 @@
       margin-bottom: 14px;
       box-shadow: 0 1px 5px rgba(0,0,0,0.08);
     }
+
     .title {
       font-size: 20px;
       font-weight: bold;
       margin-bottom: 8px;
     }
+
     .meta {
       line-height: 1.6;
       color: #333;
     }
+
     .button {
       display: inline-block;
       margin-top: 12px;
@@ -53,14 +62,18 @@
       padding: 10px 14px;
       border-radius: 10px;
     }
+
     .badge {
       display: inline-block;
       margin-top: 10px;
       padding: 6px 10px;
       border-radius: 999px;
-      background: #ececec;
+      background: #e8f5e9;
+      color: #1b5e20;
       font-size: 13px;
+      font-weight: 600;
     }
+
     .error {
       color: #b00020;
     }
@@ -88,6 +101,7 @@
 
         if (!Array.isArray(data)) {
           statusEl.innerHTML = "<span class='error'>Andmete laadimine ebaõnnestus.</span>";
+          container.innerHTML = "";
           return;
         }
 
@@ -101,6 +115,7 @@
         container.innerHTML = data.map(renderCard).join("");
       } catch (e) {
         statusEl.innerHTML = "<span class='error'>Tekkis viga andmete laadimisel.</span>";
+        container.innerHTML = "";
       }
     }
 
@@ -122,8 +137,13 @@
             <div><strong>Aeg:</strong> ${escapeHtml(dateText)}</div>
             <div><strong>Koht:</strong> ${escapeHtml(e.venue || "-")}</div>
           </div>
-          <div class="badge">Piletid saadaval</div><br/>
-          <a class="button" href="${escapeHtml(e.url)}" target="_blank" rel="noopener noreferrer">Vaata / osta</a>
+
+          <div class="badge">Piletid saadaval</div>
+          <br/>
+
+          <a class="button" href="${escapeHtml(e.url)}" target="_blank" rel="noopener noreferrer">
+            Vaata / osta
+          </a>
         </div>
       `;
     }
