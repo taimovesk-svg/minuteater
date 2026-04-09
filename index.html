@@ -106,14 +106,12 @@
   </div>
 
   <script>
-    let allEvents = [];
-
     async function loadEvents() {
       const statusEl = document.getElementById("status");
       const container = document.getElementById("events");
 
       try {
-        const res = await fetch("/api/events");
+        const res = await fetch("/events.json");
         const data = await res.json();
 
         if (!Array.isArray(data)) {
@@ -122,14 +120,14 @@
           return;
         }
 
-        allEvents = data.filter(event =>
+        const filtered = data.filter(event =>
           String(event.title || "").toLowerCase().includes("ükskord liibanonis")
         );
 
-        renderEvents(allEvents);
+        renderEvents(filtered);
       } catch (e) {
         statusEl.innerHTML = "<span class='error'>Tekkis viga andmete laadimisel.</span>";
-        document.getElementById("events").innerHTML = "";
+        container.innerHTML = "";
       }
     }
 
