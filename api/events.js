@@ -57,32 +57,30 @@ async function getLinnateaterEvents() {
     .filter(Boolean);
 
   const events = [];
-  let currentMonth = null;
   let currentYear = new Date().getFullYear();
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // nt "aprill 2026"
-    const monthHeader = line.match(/^(jaanuar|veebruar|märts|aprill|mai|juuni|juuli|august|september|oktoober|november|detsember)\s+(\d{4})$/i);
+    const monthHeader = line.match(
+      /^(jaanuar|veebruar|märts|aprill|mai|juuni|juuli|august|september|oktoober|november|detsember)\s+(\d{4})$/i
+    );
     if (monthHeader) {
-      currentMonth = monthNameToNumber(monthHeader[1]);
       currentYear = Number(monthHeader[2]);
       continue;
     }
 
-    // nt "N 09.04"
     const dateMatch = line.match(/^[ETKNRLP]\s+(\d{2})\.(\d{2})$/);
     if (!dateMatch) continue;
 
     const day = dateMatch[1];
     const month = dateMatch[2];
+
     let time = null;
-    let title = null;
     let venue = "Tallinna Linnateater";
     let buyFound = false;
 
-    for (let j = i + 1; j <= Math.min(i + 18, lines.length - 1); j++) {
+    for (let j = i + 1; j <= Math.min(i + 12, lines.length - 1); j++) {
       const next = lines[j];
 
       if (!time) {
@@ -98,27 +96,19 @@ async function getLinnateaterEvents() {
         continue;
       }
 
-      if (!title && looksLikeTitle(next)) {
-        title = next;
-        continue;
-      }
-
       if (isVenue(next)) {
         venue = next;
       }
 
-      // kui jõuame järgmise kuupäevani, katkesta
       if (/^[ETKNRLP]\s+\d{2}\.\d{2}$/.test(next)) {
         break;
       }
     }
 
     if (time && buyFound) {
-      const finalTitle = title || "Tallinna Linnateatri etendus";
-
       events.push({
         theatre: "Tallinna Linnateater",
-        title: finalTitle,
+        title: "Tallinna Linnateatri etendus",
         datetime: `${currentYear}-${month}-${day}T${time}:00+03:00`,
         venue,
         url
@@ -127,35 +117,6 @@ async function getLinnateaterEvents() {
   }
 
   return dedupe(events);
-}
-
-function looksLikeTitle(value) {
-  const v = cleanupText(value);
-  const lower = v.toLowerCase();
-
-  if (!v) return false;
-  if (v.length < 2) return false;
-  if (/^\d{2}:\d{2}$/.test(v)) return false;
-  if (/^[ETKNRLP]\s+\d{2}\.\d{2}$/.test(v)) return false;
-
-  const blocked = [
-    "mängukava",
-    "kõik etendused",
-    "piletid saadaval",
-    "kuupäev",
-    "mängukoht",
-    "lavastus",
-    "mängukohad",
-    "lavastused",
-    "osta pilet",
-    "image",
-    "tallinna linnateater"
-  ];
-
-  if (blocked.includes(lower)) return false;
-  if (isVenue(v)) return false;
-
-  return true;
 }
 
 function isVenue(value) {
@@ -172,31 +133,6 @@ function isVenue(value) {
   ].includes(v);
 }
 
-function monthNameToNumber(name) {
-  const map = {
-    "jaanuar": "01",
-    "veebruar": "02",
-    "märts": "03",
-    "aprill": "04",
-    "mai": "05",
-    "juuni": "06",
-    "juuli": "07",
-    "august": "08",
-    "september": "09",
-    "oktoober": "10",
-    "november": "11",
-    "detsember": "12"
-  };
-  return map[String(name || "").toLowerCase()] || null;
-}
-
-function cleanupText(value) {
-  return String(value || "")
-    .replace(/\u00A0/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 function stripHtml(value) {
   return String(value || "")
     .replace(/<[^>]*>/g, " ")
@@ -208,7 +144,7 @@ function stripHtml(value) {
 function dedupe(events) {
   const seen = new Set();
   return events.filter((e) => {
-    const key = `${e.title}|${e.datetime}|${e.venue}`;
+    const key = `${e.datetime}|${e.venue}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
