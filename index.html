@@ -80,7 +80,7 @@
   <div class="wrap">
     <h1>🎭 Minuteater</h1>
     <div class="subtitle">
-      Eesti Draamateatri etendused tänasest kuni 30 päeva ette.
+      Eesti Draamateatri saadavad etendused tänasest kuni 30 päeva ette.
     </div>
 
     <div id="status" class="status">Laen andmeid...</div>
@@ -124,6 +124,11 @@
         minute: "2-digit"
       });
 
+      const badge =
+        typeof e.availableTickets === "number"
+          ? `Vabu kohti: ${e.availableTickets}`
+          : "Saadav";
+
       return `
         <div class="card">
           <div class="title">${escapeHtml(e.title)}</div>
@@ -132,8 +137,8 @@
             <div><strong>Aeg:</strong> ${escapeHtml(dateText)}</div>
             <div><strong>Koht:</strong> ${escapeHtml(e.venue || "-")}</div>
           </div>
-          <div class="badge">Leitud mängukavast</div><br/>
-          <a class="button" href="${escapeHtml(e.url)}" target="_blank" rel="noopener noreferrer">Vaata lähemalt</a>
+          <div class="badge">${escapeHtml(badge)}</div><br/>
+          <a class="button" href="${escapeHtml(e.url)}" target="_blank" rel="noopener noreferrer">Vaata Piletimaailmas</a>
         </div>
       `;
     }
