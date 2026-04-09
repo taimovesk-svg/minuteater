@@ -10,10 +10,7 @@ export default async function handler(req, res) {
     };
 
     const draamaEvents = await getDraamateaterEvents();
-    const linnaEvents = []; // lisame hiljem tagasi
-
-    const events = [...draamaEvents, ...linnaEvents];
-    const filtered = applyFilters(events, config);
+    const filtered = applyFilters(draamaEvents, config);
 
     res.status(200).json(filtered);
   } catch (err) {
@@ -56,35 +53,161 @@ async function getDraamateaterEvents() {
   const url = "https://www.draamateater.ee/mangukava/";
   const html = await fetchText(url);
 
+  const lines = html
+    .split(/\r?\n/)
+    .map((line) => stripHtml(line))
+    .map((line) => line.replace(/\u00A0/g, " ").replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
   const events = [];
-  const year = new Date().getFullYear();
+  let currentDate = null;
 
-  // Lihtne starter-regex:
-  // püüab kinni kuupäeva + kellaaja + lähima lingi teksti
-  const regex = /(\d{2}\.\d{2})\s+(\d{2}:\d{2})[\s\S]{0,800}?>([^<]{3,120})<\/a>/g;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
 
-  let match;
-  while ((match = regex.exec(html)) !== null) {
-    const rawDate = match[1];   // nt 09.04
-    const rawTime = match[2];   // nt 19:00
-    const rawTitle = cleanupText(match[3]);
+    // Nt: "N 09.04 N 9 aprill 19:00 Lehman Brothers"
+    const dateLineMatch = line.match(
+      /^[ETKNRLP]\s+(\d{2})\.(\d{2}).*?(\d{2}:\d{2})\s+(.+)$/
+    );
 
-    if (isNoiseTitle(rawTitle)) continue;
+    if (dateLineMatch) {
+      const [, day, month, time, title] = dateLineMatch;
 
-    const [day, month] = rawDate.split(".");
-    const datetime = `${year}-${month}-${day}T${rawTime}:00+03:00`;
+      currentDate = {
+        day,
+        month,
+        time
+      };
 
-    events.push({
-      theatre: "Eesti Draamateater",
-      title: rawTitle,
-      datetime,
-      available: true,
-      venue: "Eesti Draamateater",
-      url
-    });
+      const year = inferYear(Number(month), Number(day));
+      const datetime = buildIso(year, month, day, time);
+
+      let venue = "Eesti Draamateater";
+      let buyUrl = url;
+
+      // vaata mõned järgmised read läbi
+      for (let j = i + 1; j <= Math.min(i + 8, lines.length - 1); j++) {
+        const next = lines[j];
+
+        if (isVenue(next)) {
+          venue = next;
+        }
+      }
+
+      events.push({
+        theatre: "Eesti Draamateater",
+        title: cleanupText(title),
+        datetime,
+        venue,
+        url: buyUrl
+      });
+
+      continue;
+    }
+
+    // erijuht: mõnel real jätkub sama kuupäeva all järgmine etendus kujul "19:00 Maag"
+    if (currentDate) {
+      const sameDayMatch = line.match(/^(\d{2}:\d{2})\s+(.+)$/);
+
+      if (sameDayMatch) {
+        const [, time, rawTitle] = sameDayMatch;
+
+        if (looksLikeTitle(rawTitle)) {
+          const year = inferYear(Number(currentDate.month), Number(currentDate.day));
+          const datetime = buildIso(year, currentDate.month, currentDate.day, time);
+
+          let venue = "Eesti Draamateater";
+
+          for (let j = i + 1; j <= Math.min(i + 6, lines.length - 1); j++) {
+            const next = lines[j];
+            if (isVenue(next)) {
+              venue = next;
+              break;
+            }
+          }
+
+          events.push({
+            theatre: "Eesti Draamateater",
+            title: cleanupText(rawTitle),
+            datetime,
+            venue,
+            url
+          });
+        }
+      }
+    }
   }
 
   return dedupe(events);
+}
+
+function inferYear(month, day) {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+
+  // lihtne loogika: kui kuu on juba ammu möödas, siis võib olla järgmine aasta
+  const currentMonth = now.getMonth() + 1;
+  if (month < currentMonth - 2) {
+    return currentYear + 1;
+  }
+
+  return currentYear;
+}
+
+function buildIso(year, month, day, time) {
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}T${time}:00+03:00`;
+}
+
+function isVenue(value) {
+  const v = String(value || "").toLowerCase();
+
+  return [
+    "suur saal",
+    "väike saal",
+    "maalisaal",
+    "teatrimaja",
+    "leedu riiklik noorsooteater",
+    "teater vanemuine, tartu"
+  ].includes(v);
+}
+
+function looksLikeTitle(value) {
+  const v = cleanupText(value).toLowerCase();
+
+  if (!v) return false;
+  if (v.length < 2) return false;
+  if (isVenue(v)) return false;
+
+  const blockedStarts = [
+    "nb!",
+    "ingliskeelsete",
+    "solarise",
+    "ugala teatri",
+    "pärast etendust",
+    "viimaseid kordi",
+    "viimast korda",
+    "lisaetendus"
+  ];
+
+  if (blockedStarts.some((x) => v.startsWith(x))) return false;
+  if (/^\d{2}:\d{2}$/.test(v)) return false;
+
+  return true;
+}
+
+function cleanupText(value) {
+  return String(value || "")
+    .replace(/\u00A0/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function stripHtml(value) {
+  return String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function dedupe(events) {
@@ -98,38 +221,10 @@ function dedupe(events) {
   });
 }
 
-function cleanupText(value) {
-  return String(value || "")
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function isNoiseTitle(value) {
-  const v = String(value || "").trim().toLowerCase();
-
-  const blockedExact = [
-    "mängukava",
-    "repertuaar",
-    "osta pilet",
-    "piletid",
-    "loe edasi",
-    "vaata rohkem"
-  ];
-
-  if (blockedExact.includes(v)) return true;
-  if (v.length < 3) return true;
-  if (/^\d+$/.test(v)) return true;
-  if (/^\d{2}:\d{2}$/.test(v)) return true;
-
-  return false;
-}
-
 async function fetchText(url) {
   const response = await fetch(url, {
     headers: {
-      "User-Agent": "MinuteaterBot/1.0"
+      "User-Agent": "Mozilla/5.0 MinuteaterBot/1.0"
     }
   });
 
@@ -139,4 +234,3 @@ async function fetchText(url) {
 
   return await response.text();
 }
-
