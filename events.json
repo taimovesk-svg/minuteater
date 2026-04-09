@@ -13,6 +13,12 @@
   },
   {
     "theatre": "Eesti Draamateater",
+    "title": "Arst",
+    "url": "https://www.piletimaailm.com/organizers/7-eesti-draamateater",
+    "available": false
+  },
+  {
+    "theatre": "Eesti Draamateater",
     "title": "Võõrad",
     "url": "https://www.piletimaailm.com/organizers/7-eesti-draamateater",
     "available": false
