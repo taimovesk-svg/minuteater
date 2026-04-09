@@ -151,34 +151,33 @@
     }
 
     function renderCard(e) {
-      return `
-        <div class="card">
-          <div class="title">${escapeHtml(e.title)}</div>
+  const mainUrl = e.url;
+  const fallbackUrl = "https://www.piletimaailm.com/organizers/7-eesti-draamateater";
 
-          <div class="meta">
-            <div><strong>Teater:</strong> ${escapeHtml(e.theatre || "Eesti Draamateater")}</div>
-            <div><strong>Staatus:</strong> Kontrolli saadavust</div>
-            <div><strong>Allikas:</strong> ametlik link</div>
-          </div>
+  return `
+    <div class="card">
+      <div class="title">${escapeHtml(e.title)}</div>
 
-          <div class="badge">🎯 Jälgitav etendus</div>
-          <br/>
+      <div class="meta">
+        <div><strong>Teater:</strong> ${escapeHtml(e.theatre || "")}</div>
+        <div><strong>Staatus:</strong> Kontrolli saadavust</div>
+      </div>
 
-          <a class="button" href="${escapeHtml(e.url)}" target="_blank" rel="noopener noreferrer">
-            🔍 Kontrolli kohe
-          </a>
-        </div>
-      `;
-    }
+      <div class="badge">🎯 Jälgitav etendus</div>
+      <br/>
 
-    function escapeHtml(value) {
-      return String(value || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
+      <a class="button" href="${escapeHtml(mainUrl)}" target="_blank">
+        🔍 Vaata etendust
+      </a>
+
+      <br/>
+
+      <a class="button" style="background:#666;" href="${fallbackUrl}" target="_blank">
+        📋 Ava kõik etendused
+      </a>
+    </div>
+  `;
+}
 
     loadEvents();
     setInterval(loadEvents, 30000);
