@@ -53,7 +53,7 @@
       line-height: 1.7;
       color: #333;
       margin-bottom: 8px;
-    }
+ 
 
     .button {
       display: inline-block;
@@ -146,14 +146,14 @@
         `Leitud ${data.length} sobivat kirjet. Leht uueneb automaatselt iga 30 sekundi järel.`;
 
       if (data.length === 0) {
-        container.innerHTML = `
-          <div class="empty">
-            Praegu ei leitud ühtegi kirjet.
-            <div class="small">Kontroll toimub automaatselt iga 30 sekundi järel.</div>
-          </div>
-        `;
-        return;
-      }
+  container.innerHTML = `
+    <div class="empty">
+      Praegu ei ole pileteid saadaval.
+      <div class="small">Kontroll toimub automaatselt iga 30 sekundi järel.</div>
+    </div>
+  `;
+  return;
+}
 
       container.innerHTML = data.map(renderCard).join("");
     }
