@@ -9,10 +9,8 @@ export default async function handler(req, res) {
       ]
     };
 
-    const [draamaEvents, linnaEvents] = await Promise.all([
-      getDraamateaterEvents(),
-      getLinnateaterEvents()
-    ]);
+    const draamaEvents = await getDraamateaterEvents();
+    const linnaEvents = []; // lisame hiljem tagasi
 
     const events = [...draamaEvents, ...linnaEvents];
     const filtered = applyFilters(events, config);
@@ -36,8 +34,6 @@ function applyFilters(events, config) {
 
   return events
     .filter((event) => {
-      if (!event.available) return false;
-
       const eventDate = new Date(event.datetime);
       if (Number.isNaN(eventDate.getTime())) return false;
 
@@ -60,159 +56,32 @@ async function getDraamateaterEvents() {
   const url = "https://www.draamateater.ee/mangukava/";
   const html = await fetchText(url);
 
-  const lines = html.split(/\r?\n/);
   const events = [];
+  const year = new Date().getFullYear();
 
-  let currentDate = null;
+  // Lihtne starter-regex:
+  // püüab kinni kuupäeva + kellaaja + lähima lingi teksti
+  const regex = /(\d{2}\.\d{2})\s+(\d{2}:\d{2})[\s\S]{0,800}?>([^<]{3,120})<\/a>/g;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = clean(lines[i]);
+  let match;
+  while ((match = regex.exec(html)) !== null) {
+    const rawDate = match[1];   // nt 09.04
+    const rawTime = match[2];   // nt 19:00
+    const rawTitle = cleanupText(match[3]);
 
-    const dateMatch = line.match(/([ETKNRLP])\s*(\d{1,2})\.(\d{2})\s+([ETKNRLP])\s*\d{1,2}\s+\S+\s+(\d{2}:\d{2})/);
-    if (dateMatch) {
-      currentDate = {
-        day: pad2(dateMatch[2]),
-        month: dateMatch[3],
-        time: dateMatch[4]
-      };
-    }
+    if (isNoiseTitle(rawTitle)) continue;
 
-    const titleMatch = line.match(/>([^<]+)<\/a>/);
-    const maybeTitle = titleMatch?.[1]?.trim();
+    const [day, month] = rawDate.split(".");
+    const datetime = `${year}-${month}-${day}T${rawTime}:00+03:00`;
 
-    if (currentDate && maybeTitle && !isNoiseTitle(maybeTitle)) {
-      const title = maybeTitle;
-
-      let venue = "";
-      let buyUrl = "";
-      let available = false;
-      let availableTickets = null;
-
-      for (let j = i; j < Math.min(i + 12, lines.length); j++) {
-        const nextLine = clean(lines[j]);
-
-        if (!venue) {
-          const venueMatch = nextLine.match(/(suur saal|väike saal|Maalisaal|teatrimaja|Leedu Riiklik Noorsooteater|Teater Vanemuine, Tartu)/i);
-          if (venueMatch) {
-            venue = venueMatch[1];
-          }
-        }
-
-        if (!buyUrl) {
-          const buyMatch = lines[j].match(/href="([^"]*piletimaailm[^"]*)"/i);
-          if (buyMatch) {
-            buyUrl = buyMatch[1];
-            available = true;
-          }
-        }
-
-        const seatsMatch = nextLine.match(/Vabu kohti:\s*(\d+)/i);
-        if (seatsMatch) {
-          availableTickets = Number(seatsMatch[1]);
-          available = availableTickets > 0;
-        }
-      }
-
-      const year = inferYear(currentDate.month);
-      const datetime = `${year}-${currentDate.month}-${currentDate.day}T${currentDate.time}:00+03:00`;
-
-      events.push({
-        theatre: "Eesti Draamateater",
-        title,
-        datetime,
-        available,
-        availableTickets,
-        venue: venue || "Eesti Draamateater",
-        url: buyUrl || url
-      });
-    }
-  }
-
-  return dedupe(events);
-}
-
-async function getLinnateaterEvents() {
-  const url = "https://linnateater.ee/mangukava/?filter=available";
-  const html = await fetchText(url);
-
-  const lines = html.split(/\r?\n/);
-  const events = [];
-
-  let currentMonth = null;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = clean(lines[i]);
-
-    const monthMatch = line.match(/###\s+([a-zõäöü]+)\s+(\d{4})/i);
-    if (monthMatch) {
-      currentMonth = {
-        monthName: monthMatch[1].toLowerCase(),
-        year: monthMatch[2]
-      };
-    }
-
-    const dateMatch = line.match(/^([ETKNRLP])\s+(\d{2})\.(\d{2})$/);
-    if (dateMatch && currentMonth) {
-      const day = dateMatch[2];
-      const month = dateMatch[3];
-
-      let time = null;
-      let title = null;
-      let venue = "Tallinna Linnateater";
-      let urlMatch = null;
-      let available = false;
-
-      for (let j = i; j < Math.min(i + 20, lines.length); j++) {
-        const nextLine = clean(lines[j]);
-
-        if (!time) {
-          const tm = nextLine.match(/^(\d{2}:\d{2})$/);
-          if (tm) time = tm[1];
-        }
-
-        if (!title) {
-          const altMatch = lines[j].match(/alt="([^"]+)"/i);
-          const titleAttrMatch = lines[j].match(/title="([^"]+)"/i);
-          const headingMatch = lines[j].match(/<h[2-4][^>]*>(.*?)<\/h[2-4]>/i);
-
-          title =
-            altMatch?.[1]?.trim() ||
-            titleAttrMatch?.[1]?.trim() ||
-            stripHtml(headingMatch?.[1] || "");
-        }
-
-        if (nextLine.includes("Osta pilet")) {
-          available = true;
-        }
-
-        if (!urlMatch) {
-          const href = lines[j].match(/href="([^"]+)"/i);
-          if (href) urlMatch = href[1];
-        }
-
-        const venueMatch = nextLine.match(/Suur saal|Väike saal|Taevasaal|Must saal|Võlvsaal|Kammer­saal|Kammersaal|Hobuveski/i);
-        if (venueMatch) {
-          venue = venueMatch[0];
-        }
-      }
-
-      if (available && time) {
-        const finalTitle = title && !isNoiseTitle(title)
-          ? title
-          : "Tallinna Linnateatri etendus";
-
-        const datetime = `${currentMonth.year}-${month}-${day}T${time}:00+03:00`;
-
-        events.push({
-          theatre: "Tallinna Linnateater",
-          title: finalTitle,
-          datetime,
-          available: true,
-          venue,
-          url: normalizeUrl(urlMatch, "https://linnateater.ee")
-        });
-      }
-    }
+    events.push({
+      theatre: "Eesti Draamateater",
+      title: rawTitle,
+      datetime,
+      available: true,
+      venue: "Eesti Draamateater",
+      url
+    });
   }
 
   return dedupe(events);
@@ -229,54 +98,32 @@ function dedupe(events) {
   });
 }
 
-function inferYear(month) {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1;
-  const parsedMonth = Number(month);
-
-  if (parsedMonth < currentMonth - 2) {
-    return currentYear + 1;
-  }
-
-  return currentYear;
-}
-
-function normalizeUrl(url, base) {
-  if (!url) return base;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  if (url.startsWith("/")) return `${base}${url}`;
-  return `${base}/${url}`;
-}
-
-function clean(value) {
+function cleanupText(value) {
   return String(value || "")
+    .replace(/<[^>]*>/g, " ")
     .replace(/&nbsp;/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-function stripHtml(value) {
-  return String(value || "")
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function pad2(value) {
-  return String(value).padStart(2, "0");
-}
-
 function isNoiseTitle(value) {
   const v = String(value || "").trim().toLowerCase();
 
-  return [
+  const blockedExact = [
     "mängukava",
     "repertuaar",
-    "piletid saadaval",
     "osta pilet",
-    "image"
-  ].includes(v);
+    "piletid",
+    "loe edasi",
+    "vaata rohkem"
+  ];
+
+  if (blockedExact.includes(v)) return true;
+  if (v.length < 3) return true;
+  if (/^\d+$/.test(v)) return true;
+  if (/^\d{2}:\d{2}$/.test(v)) return true;
+
+  return false;
 }
 
 async function fetchText(url) {
@@ -292,3 +139,4 @@ async function fetchText(url) {
 
   return await response.text();
 }
+
