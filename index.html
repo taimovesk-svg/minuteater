@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Minuteater</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -65,6 +66,10 @@
       font-weight: 600;
     }
 
+    .button.secondary {
+      background: #666;
+    }
+
     .badge {
       display: inline-block;
       margin-top: 10px;
@@ -94,9 +99,11 @@
     }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <h1>🎭 Minuteater</h1>
+
     <div class="subtitle">
       Jälgitav etendus: <strong>Ükskord Liibanonis</strong>
     </div>
@@ -115,16 +122,15 @@
         const data = await res.json();
 
         if (!Array.isArray(data)) {
-          statusEl.innerHTML = "<span class='error'>Andmete laadimine ebaõnnestus.</span>";
-          container.innerHTML = "";
-          return;
+          throw new Error("Invalid JSON");
         }
 
-        const filtered = data.filter(event =>
-          String(event.title || "").toLowerCase().includes("ükskord liibanonis")
+        const filtered = data.filter(e =>
+          (e.title || "").toLowerCase().includes("ükskord liibanonis")
         );
 
         renderEvents(filtered);
+
       } catch (e) {
         statusEl.innerHTML = "<span class='error'>Tekkis viga andmete laadimisel.</span>";
         container.innerHTML = "";
@@ -135,12 +141,13 @@
       const statusEl = document.getElementById("status");
       const container = document.getElementById("events");
 
-      statusEl.textContent = `Leitud ${data.length} sobivat kirjet. Leht uueneb automaatselt iga 30 sekundi järel.`;
+      statusEl.textContent =
+        `Leitud ${data.length} sobivat kirjet. Leht uueneb automaatselt iga 30 sekundi järel.`;
 
       if (data.length === 0) {
         container.innerHTML = `
           <div class="empty">
-            Praegu ei leitud ühtegi kirjet etendusele <strong>Ükskord Liibanonis</strong>.
+            Praegu ei leitud ühtegi kirjet.
             <div class="small">Kontroll toimub automaatselt iga 30 sekundi järel.</div>
           </div>
         `;
@@ -151,33 +158,43 @@
     }
 
     function renderCard(e) {
-  const mainUrl = e.url;
-  const fallbackUrl = "https://www.piletimaailm.com/organizers/7-eesti-draamateater";
+      const mainUrl = e.url;
+      const fallbackUrl = "https://www.piletimaailm.com/organizers/7-eesti-draamateater";
 
-  return `
-    <div class="card">
-      <div class="title">${escapeHtml(e.title)}</div>
+      return `
+        <div class="card">
+          <div class="title">${escapeHtml(e.title)}</div>
 
-      <div class="meta">
-        <div><strong>Teater:</strong> ${escapeHtml(e.theatre || "")}</div>
-        <div><strong>Staatus:</strong> Kontrolli saadavust</div>
-      </div>
+          <div class="meta">
+            <div><strong>Teater:</strong> ${escapeHtml(e.theatre || "")}</div>
+            <div><strong>Staatus:</strong> Kontrolli saadavust</div>
+          </div>
 
-      <div class="badge">🎯 Jälgitav etendus</div>
-      <br/>
+          <div class="badge">🎯 Jälgitav etendus</div>
 
-      <a class="button" href="${escapeHtml(mainUrl)}" target="_blank">
-        🔍 Vaata etendust
-      </a>
+          <br/>
 
-      <br/>
+          <a class="button" href="${escapeHtml(mainUrl)}" target="_blank">
+            🔍 Vaata etendust
+          </a>
 
-      <a class="button" style="background:#666;" href="${fallbackUrl}" target="_blank">
-        📋 Ava kõik etendused
-      </a>
-    </div>
-  `;
-}
+          <br/>
+
+          <a class="button secondary" href="${fallbackUrl}" target="_blank">
+            📋 Ava kõik etendused
+          </a>
+        </div>
+      `;
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
 
     loadEvents();
     setInterval(loadEvents, 30000);
