@@ -70,6 +70,10 @@
       background: #ececec;
       font-size: 13px;
     }
+
+    .error {
+      color: #b00020;
+    }
   </style>
 </head>
 <body>
@@ -93,7 +97,7 @@
         const data = await res.json();
 
         if (!Array.isArray(data)) {
-          statusEl.textContent = "Andmete laadimine ebaõnnestus.";
+          statusEl.innerHTML = "<span class='error'>Andmete laadimine ebaõnnestus.</span>";
           return;
         }
 
@@ -106,7 +110,7 @@
 
         container.innerHTML = data.map(renderCard).join("");
       } catch (e) {
-        statusEl.textContent = "Tekkis viga andmete laadimisel.";
+        statusEl.innerHTML = "<span class='error'>Tekkis viga andmete laadimisel.</span>";
       }
     }
 
@@ -120,11 +124,6 @@
         minute: "2-digit"
       });
 
-      const ticketText =
-        typeof e.availableTickets === "number"
-          ? `Vabu kohti: ${e.availableTickets}`
-          : "Piletid saadaval";
-
       return `
         <div class="card">
           <div class="title">${escapeHtml(e.title)}</div>
@@ -133,8 +132,8 @@
             <div><strong>Aeg:</strong> ${escapeHtml(dateText)}</div>
             <div><strong>Koht:</strong> ${escapeHtml(e.venue || "-")}</div>
           </div>
-          <div class="badge">${escapeHtml(ticketText)}</div><br/>
-          <a class="button" href="${escapeHtml(e.url)}" target="_blank" rel="noopener noreferrer">Vaata / osta pilet</a>
+          <div class="badge">Leitud mängukavast</div><br/>
+          <a class="button" href="${escapeHtml(e.url)}" target="_blank" rel="noopener noreferrer">Vaata lähemalt</a>
         </div>
       `;
     }
