@@ -6,110 +6,307 @@
   <title>Minuteater</title>
 
   <style>
+    :root {
+      --bg: #f3f5f7;
+      --surface: #ffffff;
+      --surface-2: #f8fafc;
+      --text: #111827;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --success-border: #86efac;
+      --accent: #111827;
+      --shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      padding: 24px;
       margin: 0;
-      background: #f5f5f5;
+      padding: 20px;
+      background:
+        radial-gradient(circle at top left, #ffffff 0%, #f3f5f7 45%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
     }
 
     .wrap {
-      max-width: 860px;
+      max-width: 920px;
       margin: 0 auto;
     }
 
+    .hero {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 24px 22px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .hero-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .logo {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: #111827;
+      color: white;
+      font-size: 26px;
+      box-shadow: 0 8px 18px rgba(17, 24, 39, 0.18);
+      flex-shrink: 0;
+    }
+
     h1 {
-      margin-bottom: 8px;
+      margin: 0;
+      font-size: 2.1rem;
+      line-height: 1;
+      letter-spacing: -0.03em;
     }
 
     .subtitle {
-      color: #555;
-      margin-bottom: 20px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.5;
+      margin: 0;
     }
 
     .status {
-      background: white;
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.08);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+      font-size: 1rem;
     }
 
     .card {
-      background: #e6f7ec;
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 14px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.08);
-      border: 2px solid #2ecc71;
+      background: linear-gradient(180deg, #f7fff9 0%, #eefbf2 100%);
+      border: 1px solid var(--success-border);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: auto -40px -40px auto;
+      width: 140px;
+      height: 140px;
+      background: radial-gradient(circle, rgba(34,197,94,0.13) 0%, rgba(34,197,94,0) 70%);
+      pointer-events: none;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
     }
 
     .title {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .meta {
-      line-height: 1.7;
-      color: #333;
-      margin-bottom: 8px;
-    }
-
-    .button {
-      display: inline-block;
-      margin-top: 12px;
-      text-decoration: none;
-      background: black;
-      color: white;
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-weight: 600;
+      margin: 0;
+      font-size: 2rem;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
     }
 
     .badge {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 7px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
       border-radius: 999px;
-      background: #2ecc71;
+      background: var(--success);
       color: white;
-      font-size: 13px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      white-space: nowrap;
+      box-shadow: 0 8px 18px rgba(22, 163, 74, 0.22);
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .meta-card {
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 16px;
+      padding: 14px 15px;
+    }
+
+    .meta-label {
+      display: block;
+      font-size: 0.78rem;
       font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .meta-value {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.35;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-weight: 800;
+      font-size: 0.98rem;
+      transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+      min-width: 170px;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+      opacity: 0.96;
+    }
+
+    .button.primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 10px 18px rgba(17, 24, 39, 0.2);
     }
 
     .error {
-      color: #b00020;
+      color: #b91c1c;
+      font-weight: 600;
     }
 
     .empty {
-      background: white;
-      border-radius: 14px;
-      padding: 18px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.08);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .empty-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin: 0 0 8px 0;
     }
 
     .small {
       margin-top: 10px;
-      color: #666;
-      font-size: 13px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    .footnote {
+      margin-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 14px;
+      }
+
+      .hero,
+      .status,
+      .card,
+      .empty {
+        border-radius: 18px;
+      }
+
+      .hero {
+        padding: 18px 16px;
+      }
+
+      .logo {
+        width: 46px;
+        height: 46px;
+        font-size: 22px;
+        border-radius: 14px;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .title {
+        font-size: 1.65rem;
+      }
+
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .button {
+        width: 100%;
+      }
     }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <h1>🎭 Minuteater</h1>
+    <section class="hero">
+      <div class="hero-top">
+        <div class="logo">🎭</div>
+        <div>
+          <h1>Minuteater</h1>
+        </div>
+      </div>
 
-    <div class="subtitle">
-      Jälgitavad etendused:
-      <strong>
-        Ükskord Liibanonis, Pangalaen, Arst, Võõrad, 500 aastat sõprust
-      </strong>
-    </div>
+      <p class="subtitle">
+        Jälgitavad etendused:
+        <strong>Ükskord Liibanonis, Pangalaen, Arst, Võõrad, 500 aastat sõprust</strong>
+      </p>
+    </section>
 
     <div id="status" class="status">Laen andmeid...</div>
     <div id="events"></div>
+
+    <div class="footnote">
+      Uuendus toimub automaatselt iga 5 minuti järel.
+    </div>
   </div>
 
   <script>
@@ -151,13 +348,13 @@
       const container = document.getElementById("events");
 
       statusEl.textContent =
-        `Leitud ${data.length} saadaval etendust. Leht uueneb automaatselt iga 5 minuti järel.`;
+        `Leitud ${data.length} saadaval etendust.`;
 
       if (data.length === 0) {
         container.innerHTML = `
           <div class="empty">
-            Praegu ei ole pileteid saadaval.
-            <div class="small">Kontroll toimub automaatselt iga 5 minuti järel.</div>
+            <p class="empty-title">Praegu ei ole pileteid saadaval.</p>
+            <div class="small">Kui mõni jälgitav etendus muutub saadavaks, ilmub see siia automaatselt.</div>
           </div>
         `;
         return;
@@ -170,22 +367,30 @@
       const mainUrl = e.url;
 
       return `
-        <div class="card">
-          <div class="title">${escapeHtml(e.title)}</div>
-
-          <div class="meta">
-            <div><strong>Teater:</strong> ${escapeHtml(e.theatre || "")}</div>
-            <div><strong>Staatus:</strong> 🟢 Piletid saadaval!</div>
+        <article class="card">
+          <div class="card-header">
+            <h2 class="title">${escapeHtml(e.title)}</h2>
+            <div class="badge">🔥 SAADAVAL</div>
           </div>
 
-          <div class="badge">🔥 SAADAVAL</div>
+          <div class="meta-grid">
+            <div class="meta-card">
+              <span class="meta-label">Teater</span>
+              <div class="meta-value">${escapeHtml(e.theatre || "")}</div>
+            </div>
 
-          <br/>
+            <div class="meta-card">
+              <span class="meta-label">Staatus</span>
+              <div class="meta-value">🟢 Piletid saadaval</div>
+            </div>
+          </div>
 
-          <a class="button" href="${escapeHtml(mainUrl)}" target="_blank" rel="noopener noreferrer">
-            🎟 Osta kohe
-          </a>
-        </div>
+          <div class="actions">
+            <a class="button primary" href="${escapeHtml(mainUrl)}" target="_blank" rel="noopener noreferrer">
+              🎟 Osta kohe
+            </a>
+          </div>
+        </article>
       `;
     }
 
@@ -199,7 +404,7 @@
     }
 
     loadEvents();
-    setInterval(loadEvents, 300000); // 5 min
+    setInterval(loadEvents, 300000);
   </script>
 </body>
 </html>
