@@ -67,10 +67,6 @@
       font-weight: 600;
     }
 
-    .button.secondary {
-      background: #666;
-    }
-
     .badge {
       display: inline-block;
       margin-top: 10px;
@@ -172,7 +168,6 @@
 
     function renderCard(e) {
       const mainUrl = e.url;
-      const fallbackUrl = "https://www.piletimaailm.com/organizers/7-eesti-draamateater";
 
       return `
         <div class="card">
@@ -189,12 +184,6 @@
 
           <a class="button" href="${escapeHtml(mainUrl)}" target="_blank" rel="noopener noreferrer">
             🎟 Osta kohe
-          </a>
-
-          <br/>
-
-          <a class="button secondary" href="${fallbackUrl}" target="_blank" rel="noopener noreferrer">
-            📋 Ava kõik etendused
           </a>
         </div>
       `;
